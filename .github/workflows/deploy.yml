@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código
+      - name: Baixar codigo
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
@@ -25,7 +25,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Instalar dependências
+      - name: Instalar dependencias
         run: npm ci
 
       - name: Executar testes
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
-    
+    steps:
       - name: Preparar acesso SSH
         env:
           AZURE_SSH_KEY_B64: ${{ secrets.AZURE_SSH_KEY_B64 }}
@@ -46,7 +46,6 @@ jobs:
           mkdir -p ~/.ssh
 
           printf '%s' "$AZURE_SSH_KEY_B64" | base64 --decode > ~/.ssh/id_ed25519
-
           printf '%s\n' "$AZURE_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
           chmod 600 ~/.ssh/id_ed25519
@@ -54,8 +53,7 @@ jobs:
 
           ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
 
-
-      - name: Atualizar aplicação na Azure
+      - name: Atualizar aplicacao na Azure
         env:
           AZURE_HOST: ${{ secrets.AZURE_HOST }}
           AZURE_USER: ${{ secrets.AZURE_USER }}
