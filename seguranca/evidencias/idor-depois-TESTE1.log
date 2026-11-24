@@ -1,0 +1,18 @@
+[TESTE1] === IDOR / DEPOIS: cada usuário só acessa o que é seu ===
+[TESTE1] OK      A e B criam seus dispositivos e safras
+[TESTE1] OK      sem token, a safra de A é bloqueada (401)
+[TESTE1] OK      B troca o ID e tenta LER a safra de A -> 404
+[TESTE1] OK      B tenta ENCERRAR a safra de A -> 404
+[TESTE1] OK      B tenta ver a PREVISÃO da safra de A -> 404
+[TESTE1] OK      B tenta LER o dispositivo de A -> 404
+[TESTE1] OK      B tenta ALTERAR o dispositivo de A -> 404
+[TESTE1] OK      B tenta COMANDAR o dispositivo de A -> 404
+[TESTE1] OK      B pede as leituras do canal de A -> 404
+[TESTE1] OK      B lista safras: só aparece a dele
+[TESTE1] --- tentativas de contorno ---
+[TESTE1] OK      B tenta criar safra ligada ao canal de A -> 404
+[TESTE1] OK      B manda donoId no corpo: é ignorado (a safra fica de B e ativa)
+[TESTE1] OK      token adulterado (trocar o dono no payload) -> 401
+[TESTE1] OK      o dono (A) continua acessando a própria safra -> 200
+[TESTE1] OK      o dono (A) continua acessando o próprio dispositivo -> 200
+[TESTE1] RESULTADO: trocar o ID na requisição não dá acesso a dados de outro usuário (404); o dono tem 200.

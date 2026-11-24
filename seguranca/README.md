@@ -1,7 +1,7 @@
 # Segurança do Parreiral (Cibersegurança — Prof. Ronierison, Senac)
 
-**Código de missão:** `[PREENCHER: código de 6 caracteres enviado pelo professor]`
-**Equipe:** `[PREENCHER: nomes e usuários do GitHub]`
+**Código de missão:** `TESTE1`
+**Equipe:** **Equipe:** Marcos Vinícius (MarcosVinicius-SS), Caio Sabino (CaioSabinoC), Arthur Vinicius (viniciussna), Thauan Bezerra (Thauan-rgb), Pedro Rodrigues (Pedrorgbgrdg)
 
 Dois controles aplicados ao back-end do PI (Parreiral, Node/Express/MongoDB):
 
