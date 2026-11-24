@@ -1,7 +1,6 @@
 name: CI/CD - Parreiral
 
 on:
- on:
   push:
     branches:
       - main
