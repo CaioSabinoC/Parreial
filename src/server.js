@@ -5,6 +5,7 @@ const mqttClient = require('./mqtt/client');
 
 async function main() {
   if (!config.mongoUri) throw new Error('Defina MONGODB_URI no arquivo .env');
+  config.validarSeguranca();
 
   await mongoose.connect(config.mongoUri);
   console.log('[mongo] conectado');
