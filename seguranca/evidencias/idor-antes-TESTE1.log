@@ -1,0 +1,8 @@
+[TESTE1] === IDOR / ANTES: a API original não tem dono nos dados ===
+[TESTE1] OK      "usuário A" cria uma safra (sem login, sem dono) -> status 201
+[TESTE1] OK      "usuário B" lê a safra de A trocando só o ID (vulnerável) -> status 200
+[TESTE1] OK      "usuário B" lista TODAS as safras de todos (vulnerável) -> 2 safras visíveis
+[TESTE1] OK      GET /leituras sem filtro devolve leituras de qualquer canal (vulnerável) -> 0 leituras visíveis
+[TESTE1] OK      "usuário B" ENCERRA a safra de A (vulnerável) -> status 200
+[TESTE1] OK      não existe controle de dispositivos (rota ausente) -> status 404
+[TESTE1] RESULTADO: qualquer um lê e altera dados de qualquer um (comportamento esperado ANTES do controle).

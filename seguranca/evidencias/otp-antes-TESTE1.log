@@ -1,0 +1,4 @@
+[TESTE1] === OTP / ANTES: a API original não tem login nem segundo fator ===
+[TESTE1] OK      a API NÃO tem login (POST /auth/login não existe) -> status 404
+[TESTE1] OK      GET /safras SEM nenhuma credencial é aceito (vulnerável) -> status 200
+[TESTE1] RESULTADO: qualquer pessoa acessa a API sem senha e sem OTP (comportamento esperado ANTES do controle).

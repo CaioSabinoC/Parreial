@@ -1,4 +1,3 @@
-
 name: CI/CD - Parreiral
 
 on:
@@ -15,6 +14,18 @@ jobs:
     name: Testes automatizados
     runs-on: ubuntu-latest
 
+    # MongoDB para os testes de integração de OTP e IDOR
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Baixar codigo
         uses: actions/checkout@v4
@@ -29,6 +40,8 @@ jobs:
         run: npm ci
 
       - name: Executar testes
+        env:
+          MONGODB_URI_TESTE: mongodb://127.0.0.1:27017/parreiral_teste
         run: npm test
 
   deploy:
