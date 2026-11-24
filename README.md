@@ -90,3 +90,8 @@ analytics/         scripts Python (fase 2)
 ## Deploy
 
 O subscriber MQTT precisa de um processo **sempre ligado**, então o back **não roda na Netlify** (que hospeda só o front estático e funções serverless). Use um serviço como Render ou Railway, com MongoDB Atlas. Configure as variáveis de ambiente no painel do serviço e ajuste `CORS_ORIGIN` para a URL do front.
+
+
+## Segurança (OTP + IDOR)
+
+A API agora exige login em 2 etapas (senha + código de app autenticador) e cada usuário só acessa os próprios dados. Detalhes, testes e limitações em [`seguranca/README.md`](seguranca/README.md). Rotas novas: `/auth/*` e `/dispositivos`.
