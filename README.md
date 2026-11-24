@@ -1,92 +1,181 @@
-# Parreiral Back
+# VinhaSense — Backend
 
-Back-end do projeto de IoT de monitoramento de parreiral: um **ESP32** com sensor **DHT11** (temperatura e umidade do ar) e sensor de **umidade do solo** envia dados ao **ThingSpeak**; este serviço recebe as leituras por **MQTT**, guarda no **MongoDB**, permite **cadastrar safras** e calcula a **previsão de colheita** (quantidade em kg e data).
+Backend da plataforma **VinhaSense**, desenvolvida para monitoramento de condições ambientais de um parreiral e estimativa de produtividade e previsão de colheita.
 
+O sistema recebe dados de sensores conectados a um ESP32, processa as informações, armazena as leituras e disponibiliza os dados por meio de uma API REST consumida pelo frontend.
+
+## Equipe VinhaSense
+
+- Arthur Vinicius
+- Caio Sabino
+- Marcos Vinicius
+- Pedro Rodrigues
+- Thauan Bezerra
+
+## Arquitetura do sistema
+
+O projeto utiliza um ESP32 equipado com sensores para monitoramento da temperatura, umidade do ar e umidade do solo.
+
+As informações são enviadas ao ThingSpeak, que disponibiliza os dados por meio de MQTT. O backend recebe essas mensagens, interpreta as leituras e realiza o armazenamento no MongoDB.
+
+O frontend consome a API REST para apresentar os dados em um painel de monitoramento.
+
+```text
+ESP32
+ ├── DHT11
+ │    ├── Temperatura
+ │    └── Umidade do ar
+ └── Sensor de umidade do solo
+          │
+          ▼
+      ThingSpeak
+          │ MQTT
+          ▼
+   Backend Node.js
+       Express
+          │
+          ├── Processamento das leituras
+          ├── Previsão de safra
+          └── API REST
+                │
+                ▼
+             MongoDB
+                ▲
+                │
+          Frontend React
 ```
-ESP32 ──► ThingSpeak ──MQTT──► Back (Node/Express) ──► MongoDB
-                                      │
-                                      └── API REST ──► Front (painel)
+
+## Tecnologias utilizadas
+
+- **Node.js:** ambiente de execução JavaScript.
+- **Express 5:** criação da API REST.
+- **MongoDB:** banco de dados NoSQL.
+- **Mongoose:** modelagem e comunicação com o MongoDB.
+- **MQTT:** comunicação com o ThingSpeak.
+- **CORS:** configuração de acesso entre frontend e backend.
+- **dotenv:** gerenciamento de variáveis de ambiente.
+- **Nodemon:** reinicialização automática durante o desenvolvimento.
+
+## Funcionalidades
+
+- Recebimento de dados dos sensores por MQTT.
+- Integração com o ThingSpeak.
+- Armazenamento das leituras no MongoDB.
+- Consulta de leituras por período.
+- Consulta da última leitura recebida.
+- Resumo de temperatura e umidade.
+- Cadastro e gerenciamento de safras.
+- Encerramento de safras com registro da produção real.
+- Cálculo de estimativa de produtividade em quilogramas.
+- Previsão de data de colheita.
+- Histórico de previsões.
+- Endpoint de monitoramento da API, MongoDB e MQTT.
+
+## Estrutura do projeto
+
+```text
+Parreial/
+├── src/
+│   ├── config/
+│   │   ├── env.js
+│   │   └── parametrosVideira.js
+│   ├── controllers/
+│   │   ├── leituraController.js
+│   │   └── safraController.js
+│   ├── middlewares/
+│   │   └── erros.js
+│   ├── models/
+│   │   ├── Leitura.js
+│   │   ├── Previsao.js
+│   │   └── Safra.js
+│   ├── mqtt/
+│   │   ├── client.js
+│   │   └── handler.js
+│   ├── routes/
+│   │   ├── leituraRoutes.js
+│   │   └── safraRoutes.js
+│   ├── services/
+│   │   ├── leituraService.js
+│   │   └── previsaoService.js
+│   ├── app.js
+│   └── server.js
+├── analytics/
+├── test/
+├── .env.example
+├── package.json
+└── README.md
 ```
 
 ## Requisitos
 
-- Node.js 18 ou superior
-- MongoDB (local ou MongoDB Atlas)
-- Um dispositivo MQTT criado no ThingSpeak (Devices → MQTT) com acesso ao canal
+- Node.js 18 ou superior.
+- MongoDB local ou MongoDB Atlas.
+- Conta e configuração de dispositivo MQTT no ThingSpeak.
 
-## Como rodar
+## Configuração e execução local
+
+Clone o repositório:
+
+```bash
+git clone https://github.com/CaioSabinoC/Parreial.git
+cd Parreial
+```
+
+Instale as dependências:
 
 ```bash
 npm install
-cp .env.example .env     # preencha MONGODB_URI e as credenciais do MQTT
-npm run dev              # desenvolvimento (nodemon)
-npm start                # produção
-npm test                 # testes do interpretador de mensagens MQTT
 ```
 
-Sem as credenciais MQTT, a API sobe normalmente e o subscriber fica desligado (aparece um aviso no log). Útil para desenvolver o resto sem o ThingSpeak.
+Crie o arquivo de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+Configure no `.env` os dados de conexão com o MongoDB e as credenciais MQTT do ThingSpeak.
+
+Inicie em modo de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+Para iniciar em produção:
+
+```bash
+npm start
+```
+
+Para executar os testes:
+
+```bash
+npm test
+```
+
+Caso as credenciais MQTT não estejam configuradas, a API pode iniciar sem o subscriber MQTT, conforme a configuração da aplicação.
+
+**Importante:** não publique o arquivo `.env` nem compartilhe credenciais de acesso. Utilize `.env.example` como referência de configuração.
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. As principais: `MONGODB_URI`, `MQTT_CLIENT_ID`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `THINGSPEAK_CHANNEL_ID` e `CORS_ORIGIN`. Os campos `FIELD_*` dizem em qual field do canal está cada sensor.
+As principais configurações estão documentadas em `.env.example`.
 
-## Endpoints
-
-| Método | Rota | Descrição |
-|---|---|---|
-| GET | `/health` | Estado da API, do Mongo e do MQTT |
-| GET | `/leituras?inicio=&fim=&limite=` | Leituras por período (padrão: últimas 24 h) |
-| GET | `/leituras/ultima` | Leitura mais recente |
-| GET | `/leituras/resumo?periodo=dia\|semana` | Média, mínimo e máximo por sensor |
-| POST | `/safras` | Cadastra uma safra |
-| GET | `/safras?status=ativa` | Lista safras |
-| GET | `/safras/:id` | Detalhe da safra |
-| PATCH | `/safras/:id/encerrar` | Encerra e registra `colheitaRealKg` |
-| GET | `/safras/:id/previsao` | Calcula (e salva) a previsão da safra |
-| GET | `/safras/:id/previsoes` | Histórico de previsões da safra |
-| GET | `/safras/previsao?inicio=&fim=` | Soma dos kg previstos para colheitas no período |
-
-Exemplo de cadastro:
-
-```json
-POST /safras
-{
-  "nome": "Safra 1 - 2027",
-  "variedade": "Syrah",
-  "grausDiaColheita": 1500,
-  "areaHa": 2.5,
-  "dataPoda": "2027-01-10",
-  "produtividadeBaseKgHa": 18000
-}
-```
-
-## Como a previsão funciona (fase 1)
-
-- **Data da colheita:** soma de **graus-dia** (temperatura média diária − 10 °C, quando positiva) desde a poda. Quando o acumulado atinge `grausDiaColheita` da safra, é hora de colher. O ritmo recente de acúmulo estima os dias restantes.
-- **Quantidade (kg):** `áreaHa × produtividadeBaseKgHa × fatorClima`. O `fatorClima` (0 a 1) é a média diária de notas que comparam temperatura, umidade do ar e umidade do solo com faixas ideais, com penalidade para dias de calor extremo.
-- Cada resposta traz `confiabilidade: "baixa"` quando menos de 50% dos dias da safra têm leituras.
-
-**Limitações:** é uma estimativa por regra, não um modelo treinado. As faixas ideais e o valor de graus-dia em `src/config/parametrosVideira.js` são **provisórios** e devem ser confirmados com fonte agronômica. O DHT11 tem precisão modesta (±2 °C, ±5% UR). O sensor de solo precisa de calibração (veja `SOLO_RAW_*` no `.env.example`).
-
-**Fase 2:** ao encerrar cada safra, o rendimento real fica guardado; com algumas safras é possível calibrar a previsão por regressão (pasta `analytics/`).
-
-## Estrutura
-
-```
-src/
-├── config/        env.js e parametrosVideira.js
-├── models/        Leitura, Safra, Previsao (Mongoose)
-├── mqtt/          client.js (conexão) e handler.js (interpreta e salva)
-├── services/      leituraService, previsaoService
-├── controllers/   leituraController, safraController
-├── routes/        leituraRoutes, safraRoutes
-├── middlewares/   erros.js
-├── app.js         Express
-└── server.js      sobe HTTP + MQTT
-test/              testes do handler MQTT
-analytics/         scripts Python (fase 2)
-```
-
-## Deploy
-
-O subscriber MQTT precisa de um processo **sempre ligado**, então o back **não roda na Netlify** (que hospeda só o front estático e funções serverless). Use um serviço como Render ou Railway, com MongoDB Atlas. Configure as variáveis de ambiente no painel do serviço e ajuste `CORS_ORIGIN` para a URL do front.
+| Variável | Finalidade |
+|---|---|
+| `PORT` | Porta HTTP da API |
+| `CORS_ORIGIN` | Origem autorizada para acesso à API |
+| `MONGODB_URI` | Conexão com o MongoDB |
+| `MQTT_ENABLED` | Habilita ou desabilita a integração MQTT |
+| `MQTT_HOST` | Endereço do broker MQTT |
+| `MQTT_PORT` | Porta de comunicação MQTT |
+| `MQTT_PROTOCOL` | Protocolo de conexão |
+| `MQTT_CLIENT_ID` | Identificador do cliente MQTT |
+| `MQTT_USERNAME` | Usuário MQTT |
+| `MQTT_PASSWORD` | Senha MQTT |
+| `THINGSPEAK_CHANNEL_ID` | Identificador do canal ThingSpeak |
+| `FIELD_TEMPERATURA` | Campo da temperatura |
+| `FIELD_UMIDADE_AR` | Campo da umidade do ar |
+| `FIELD_UMIDADE_SOLO` | Campo da umidade do solo |
+| `SOLO_RAW_SECO` | Referência de calibração do solo seco |
+| `SOLO_RAW_MOL
