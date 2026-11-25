@@ -28,3 +28,23 @@ exports.resumo = async (req, res, next) => {
     res.json(await leituraService.resumo(periodo, req.canais));
   } catch (err) { next(err); }
 };
+
+exports.ultimas = async (req, res, next) => {
+  try {
+    res.json(await leituraService.ultimasPorCanal(req.canais));
+  } catch (err) { next(err); }
+};
+
+// Série agregada para gráficos. bucket=hora (padrão) ou dia. Janela máxima de 90 dias.
+exports.serie = async (req, res, next) => {
+  try {
+    const fim = req.query.fim ? new Date(req.query.fim) : new Date();
+    const inicio = req.query.inicio ? new Date(req.query.inicio) : new Date(fim.getTime() - MS_DIA);
+    if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) {
+      return res.status(400).json({ erro: 'Datas inválidas. Use AAAA-MM-DD ou ISO 8601' });
+    }
+    if (fim - inicio > 90 * MS_DIA) return res.status(400).json({ erro: 'Período máximo: 90 dias' });
+    const bucket = req.query.bucket === 'dia' ? 'dia' : 'hora';
+    res.json(await leituraService.serie({ inicio, fim, canais: req.canais, bucket }));
+  } catch (err) { next(err); }
+};

@@ -11,7 +11,9 @@ const app = express();
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 
-app.get('/health', (req, res) => {
+const api = express.Router();
+
+api.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'conectado' : 'desconectado',
@@ -19,12 +21,16 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/auth', require('./routes/authRoutes'));
+api.use('/auth', require('./routes/authRoutes'));
 
 // Daqui para baixo, só com login completo (senha + OTP)
-app.use('/leituras', autenticar, require('./routes/leituraRoutes'));
-app.use('/safras', autenticar, require('./routes/safraRoutes'));
-app.use('/dispositivos', autenticar, require('./routes/dispositivoRoutes'));
+api.use('/leituras', autenticar, require('./routes/leituraRoutes'));
+api.use('/safras', autenticar, require('./routes/safraRoutes'));
+api.use('/dispositivos', autenticar, require('./routes/dispositivoRoutes'));
+
+// O front chama /api/...; o Nginx pode ou não remover o prefixo, então a API responde nos dois caminhos.
+app.use('/api', api);
+app.use('/', api);
 
 app.use(naoEncontrado);
 app.use(tratarErros);
