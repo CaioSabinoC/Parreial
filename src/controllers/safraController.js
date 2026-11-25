@@ -74,3 +74,20 @@ exports.previsaoPeriodo = async (req, res, next) => {
     res.json(await previsaoService.previsaoPorPeriodo(inicio, fim, req.usuario.id));
   } catch (err) { next(err); }
 };
+
+// Painel: todas as safras do usuário já com a previsão calculada (SEM gravar no histórico).
+// Safra sem leituras volta com previsao: null e o motivo em previsaoErro.
+exports.painel = async (req, res, next) => {
+  try {
+    const safras = await Safra.find({ donoId: req.usuario.id }).sort({ dataPoda: -1 }).lean();
+    const itens = await Promise.all(safras.map(async (safra) => {
+      try {
+        return { ...safra, previsao: await previsaoService.calcularPrevisao(safra._id, req.usuario.id) };
+      } catch (err) {
+        if (err.status && err.status < 500) return { ...safra, previsao: null, previsaoErro: err.message };
+        throw err;
+      }
+    }));
+    res.json(itens);
+  } catch (err) { next(err); }
+};

@@ -7,6 +7,7 @@ router.get('/', c.listar);
 
 // Rotas fixas ANTES de '/:id'
 router.get('/previsao', c.previsaoPeriodo);
+router.get('/painel', c.painel);
 
 router.get('/:id', safraDoDono, c.buscar);
 router.patch('/:id/encerrar', safraDoDono, c.encerrar);

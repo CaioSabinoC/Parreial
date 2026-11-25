@@ -268,3 +268,68 @@ test('IDOR: o dono continua com acesso total (A recebe 200)', async () => {
   assert.strictEqual(leituras.corpo.length, 1);
   assert.strictEqual((await chamar('GET', `/safras/${ctx.sA}/previsao`, undefined, ctx.a.token)).status, 200);
 });
+
+// ============== Endpoints que alimentam o painel (dados direto do banco) ==============
+test('Painel: /api/... responde igual a /... (o Nginx pode ou não tirar o prefixo)', async () => {
+  assert.strictEqual((await chamar('GET', '/api/health')).status, 200);
+  assert.strictEqual((await chamar('GET', '/api/safras')).status, 401);
+  assert.strictEqual((await chamar('GET', '/api/safras', undefined, ctx.a.token)).status, 200);
+});
+
+test('Painel: /leituras/ultimas devolve a última leitura de cada canal e só do próprio usuário', async () => {
+  await Leitura.create({ temperatura: 30, umidadeAr: 50, umidadeSolo: 20, canalId: 'canal-A', lidoEm: new Date(Date.now() + 1000) });
+  const a = await chamar('GET', '/leituras/ultimas', undefined, ctx.a.token);
+  assert.strictEqual(a.status, 200);
+  assert.strictEqual(a.corpo.length, 1);
+  assert.strictEqual(a.corpo[0].canalId, 'canal-A');
+  assert.strictEqual(a.corpo[0].umidadeSolo, 20); // a mais recente, não a primeira inserida
+
+  const b = await chamar('GET', '/leituras/ultimas', undefined, ctx.b.token);
+  assert.deepStrictEqual(b.corpo, []);
+  assert.strictEqual((await chamar('GET', '/leituras/ultimas?canalId=canal-A', undefined, ctx.b.token)).status, 404);
+});
+
+test('Painel: /leituras/serie agrega por hora e por dia (média por intervalo)', async () => {
+  const base = Date.UTC(2026, 5, 10, 15, 0, 0); // 10/06/2026 12:00 em Recife
+  await Leitura.insertMany([
+    { temperatura: 20, umidadeAr: 60, umidadeSolo: 30, canalId: 'canal-A', lidoEm: new Date(base + 5 * 60 * 1000) },
+    { temperatura: 30, umidadeAr: 80, umidadeSolo: 50, canalId: 'canal-A', lidoEm: new Date(base + 35 * 60 * 1000) },
+    { temperatura: 24, umidadeAr: 70, umidadeSolo: 40, canalId: 'canal-A', lidoEm: new Date(base + 65 * 60 * 1000) },
+  ]);
+  const q = 'inicio=2026-06-10T00:00:00Z&fim=2026-06-11T00:00:00Z&canalId=canal-A';
+
+  const hora = await chamar('GET', `/leituras/serie?${q}&bucket=hora`, undefined, ctx.a.token);
+  assert.strictEqual(hora.status, 200);
+  assert.strictEqual(hora.corpo.length, 2);
+  assert.strictEqual(hora.corpo[0].temperatura, 25);
+  assert.strictEqual(hora.corpo[0].umidadeSolo, 40);
+  assert.strictEqual(hora.corpo[0].n, 2);
+  assert.strictEqual(new Date(hora.corpo[0].t).toISOString(), '2026-06-10T15:00:00.000Z');
+
+  const dia = await chamar('GET', `/leituras/serie?${q}&bucket=dia`, undefined, ctx.a.token);
+  assert.strictEqual(dia.corpo.length, 1);
+  assert.strictEqual(new Date(dia.corpo[0].t).toISOString(), '2026-06-10T03:00:00.000Z'); // 00:00 de Recife
+  assert.strictEqual(dia.corpo[0].n, 3);
+});
+
+test('Painel: /leituras/serie respeita dono, datas e limite de 90 dias', async () => {
+  assert.strictEqual((await chamar('GET', '/leituras/serie?canalId=canal-A', undefined, ctx.b.token)).status, 404);
+  assert.deepStrictEqual((await chamar('GET', '/leituras/serie', undefined, ctx.b.token)).corpo, []);
+  assert.strictEqual((await chamar('GET', '/leituras/serie?inicio=abc', undefined, ctx.a.token)).status, 400);
+  assert.strictEqual((await chamar('GET', '/leituras/serie?inicio=2026-01-01&fim=2026-12-31', undefined, ctx.a.token)).status, 400);
+});
+
+test('Painel: /safras/painel traz só safras do usuário, com previsão (ou o motivo) e sem gravar histórico', async () => {
+  const Previsao = require('../src/models/Previsao');
+  const antes = await Previsao.countDocuments();
+  const a = await chamar('GET', '/safras/painel', undefined, ctx.a.token);
+  assert.strictEqual(a.status, 200);
+  assert.deepStrictEqual(a.corpo.map((s) => s._id), [ctx.sA]);
+  assert.ok(a.corpo[0].previsao.kgEstimado >= 0);
+
+  const b = await chamar('GET', '/safras/painel', undefined, ctx.b.token);
+  assert.ok(b.corpo.length >= 1);
+  assert.ok(b.corpo.every((s) => s._id !== ctx.sA));
+  assert.ok(b.corpo.every((s) => s.previsao === null && typeof s.previsaoErro === 'string'));
+  assert.strictEqual(await Previsao.countDocuments(), antes);
+});

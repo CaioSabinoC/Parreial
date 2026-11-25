@@ -44,4 +44,54 @@ async function resumo(periodo, canais) {
   return { periodo: periodo === 'semana' ? 'semana' : 'dia', inicio, ...(r || { total: 0 }) };
 }
 
-module.exports = { listar, ultima, resumo };
+// Última leitura de CADA canal do usuário (para o painel: status online/offline e valores atuais)
+async function ultimasPorCanal(canais) {
+  // Uma consulta por canal, aproveitando o índice { canalId, lidoEm } (um $sort global estouraria a memória com histórico grande)
+  const linhas = await Promise.all(canais.map((canalId) =>
+    Leitura.findOne({ canalId }).sort({ lidoEm: -1 }).select('canalId lidoEm temperatura umidadeAr umidadeSolo -_id').lean()
+  ));
+  return linhas.filter(Boolean);
+}
+
+// Recife fica em UTC-3 o ano todo (sem horário de verão). O corte de "dia" usa esse deslocamento.
+const OFFSET_RECIFE_MS = 3 * 60 * 60 * 1000;
+const MS_HORA = 60 * 60 * 1000;
+
+// Série agregada por hora ou por dia, para gráficos (evita mandar milhares de leituras brutas)
+async function serie({ inicio, fim, canais, bucket = 'hora' }) {
+  const passo = bucket === 'dia' ? MS_DIA : MS_HORA;
+  const deslocamento = bucket === 'dia' ? OFFSET_RECIFE_MS : 0;
+  const ms = { $toLong: '$lidoEm' };
+  const inicioDoPasso = {
+    $subtract: [
+      ms,
+      { $mod: [{ $subtract: [ms, deslocamento] }, passo] },
+    ],
+  };
+
+  return Leitura.aggregate([
+    { $match: { lidoEm: { $gte: inicio, $lte: fim }, canalId: { $in: canais } } },
+    {
+      $group: {
+        _id: inicioDoPasso,
+        temperatura: { $avg: '$temperatura' },
+        umidadeAr: { $avg: '$umidadeAr' },
+        umidadeSolo: { $avg: '$umidadeSolo' },
+        n: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    {
+      $project: {
+        _id: 0,
+        t: { $toDate: '$_id' },
+        temperatura: { $round: ['$temperatura', 1] },
+        umidadeAr: { $round: ['$umidadeAr', 1] },
+        umidadeSolo: { $round: ['$umidadeSolo', 1] },
+        n: 1,
+      },
+    },
+  ]);
+}
+
+module.exports = { listar, ultima, ultimasPorCanal, resumo, serie };

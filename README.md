@@ -70,6 +70,8 @@ ESP32
 - Previsão de data de colheita.
 - Histórico de previsões.
 - Endpoint de monitoramento da API, MongoDB e MQTT.
+- Endpoints do painel: `GET /leituras/ultimas` (última leitura por sensor), `GET /leituras/serie` (médias por hora ou dia, até 90 dias) e `GET /safras/painel` (safras com previsão, sem gravar histórico).
+- Todas as rotas respondem também com o prefixo `/api` (ex.: `/api/safras`).
 
 ## Estrutura do projeto
 
