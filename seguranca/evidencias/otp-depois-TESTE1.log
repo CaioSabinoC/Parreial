@@ -1,0 +1,14 @@
+[TESTE1] === OTP / DEPOIS: login em 2 etapas com app autenticador ===
+[TESTE1] OK      sem token, GET /safras é bloqueado
+[TESTE1] OK      cadastro devolve QR Code para o app autenticador
+[TESTE1] OK      primeiro código do app ativa o OTP e entrega 10 códigos de recuperação
+[TESTE1] OK      senha certa devolve só a etapa "otp" (sem token de acesso)
+[TESTE1] OK      TENTATIVA DE CONTORNO: token parcial (só senha) não acessa a API
+[TESTE1] OK      código errado é recusado
+[TESTE1] OK      código certo libera o acesso
+[TESTE1] OK      com o token de acesso, GET /safras funciona
+[TESTE1] OK      TENTATIVA DE CONTORNO: reutilizar o mesmo código é recusado
+[TESTE1] OK      código de recuperação libera uma vez
+[TESTE1] OK      o mesmo código de recuperação não vale de novo
+[TESTE1] OK      TENTATIVA DE CONTORNO: após 5 erros a conta bloqueia (423), mesmo com código certo -> status 423
+[TESTE1] RESULTADO: o acesso só abre com senha + código válido do app (ou recuperação), e a conferência é no servidor.

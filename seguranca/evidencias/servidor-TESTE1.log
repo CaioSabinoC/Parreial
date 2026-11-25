@@ -1,0 +1,44 @@
+
+> parreiral-back@1.0.0 start
+> node src/server.js
+
+[mongo] conectado
+[mqtt] não iniciado, faltam variáveis de ambiente: clientId, username, password
+[http] rodando na porta 3000
+[seguranca][TESTE1] 2026-11-24T09:31:20.646Z USUARIO_CRIADO {"usuario":"6b0559689c1f0a01f4eef67f"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.685Z OTP_ATIVADO {"usuario":"6b0559689c1f0a01f4eef67f"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.725Z LOGIN_SENHA_OK {"usuario":"6b0559689c1f0a01f4eef67f","otpAtivo":true}
+[seguranca][TESTE1] 2026-11-24T09:31:20.732Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef67f","motivo":"otp","falhas":1}
+[seguranca][TESTE1] 2026-11-24T09:31:20.742Z LOGIN_COMPLETO {"usuario":"6b0559689c1f0a01f4eef67f","via":"otp"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.784Z LOGIN_SENHA_OK {"usuario":"6b0559689c1f0a01f4eef67f","otpAtivo":true}
+[seguranca][TESTE1] 2026-11-24T09:31:20.790Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef67f","motivo":"otp","falhas":1}
+[seguranca][TESTE1] 2026-11-24T09:31:20.825Z LOGIN_SENHA_OK {"usuario":"6b0559689c1f0a01f4eef67f","otpAtivo":true}
+[seguranca][TESTE1] 2026-11-24T09:31:20.831Z LOGIN_COMPLETO {"usuario":"6b0559689c1f0a01f4eef67f","via":"recuperacao"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.869Z LOGIN_SENHA_OK {"usuario":"6b0559689c1f0a01f4eef67f","otpAtivo":true}
+[seguranca][TESTE1] 2026-11-24T09:31:20.875Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef67f","motivo":"recuperacao","falhas":1}
+[seguranca][TESTE1] 2026-11-24T09:31:20.914Z USUARIO_CRIADO {"usuario":"6b0559689c1f0a01f4eef680"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.928Z OTP_ATIVADO {"usuario":"6b0559689c1f0a01f4eef680"}
+[seguranca][TESTE1] 2026-11-24T09:31:20.962Z LOGIN_SENHA_OK {"usuario":"6b0559689c1f0a01f4eef680","otpAtivo":true}
+[seguranca][TESTE1] 2026-11-24T09:31:20.966Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef680","motivo":"otp","falhas":1}
+[seguranca][TESTE1] 2026-11-24T09:31:20.970Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef680","motivo":"otp","falhas":2}
+[seguranca][TESTE1] 2026-11-24T09:31:20.975Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef680","motivo":"otp","falhas":3}
+[seguranca][TESTE1] 2026-11-24T09:31:20.979Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef680","motivo":"otp","falhas":4}
+[seguranca][TESTE1] 2026-11-24T09:31:20.981Z CONTA_BLOQUEADA {"usuario":"6b0559689c1f0a01f4eef680","minutos":15}
+[seguranca][TESTE1] 2026-11-24T09:31:20.982Z FALHA_AUTENTICACAO {"usuario":"6b0559689c1f0a01f4eef680","motivo":"otp","falhas":5}
+[seguranca][TESTE1] 2026-11-24T09:31:21.159Z USUARIO_CRIADO {"usuario":"6b0559699c1f0a01f4eef681"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.181Z OTP_ATIVADO {"usuario":"6b0559699c1f0a01f4eef681"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.226Z USUARIO_CRIADO {"usuario":"6b0559699c1f0a01f4eef682"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.241Z OTP_ATIVADO {"usuario":"6b0559699c1f0a01f4eef682"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.247Z DISPOSITIVO_CRIADO {"usuario":"6b0559699c1f0a01f4eef681","dispositivo":"6b0559699c1f0a01f4eef683"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.251Z DISPOSITIVO_CRIADO {"usuario":"6b0559699c1f0a01f4eef682","dispositivo":"6b0559699c1f0a01f4eef684"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.269Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"safra","id":"6b0559699c1f0a01f4eef685","rota":"GET /safras/6b0559699c1f0a01f4eef685"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.274Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"safra","id":"6b0559699c1f0a01f4eef685","rota":"PATCH /safras/6b0559699c1f0a01f4eef685/encerrar"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.277Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"safra","id":"6b0559699c1f0a01f4eef685","rota":"GET /safras/6b0559699c1f0a01f4eef685/previsao"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.281Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"dispositivo","id":"6b0559699c1f0a01f4eef683","rota":"GET /dispositivos/6b0559699c1f0a01f4eef683"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.285Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"dispositivo","id":"6b0559699c1f0a01f4eef683","rota":"PATCH /dispositivos/6b0559699c1f0a01f4eef683"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.289Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"dispositivo","id":"6b0559699c1f0a01f4eef683","rota":"POST /dispositivos/6b0559699c1f0a01f4eef683/comandos"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.293Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"canal","id":"sintetico-A-xz50r6","rota":"GET /leituras"}
+[seguranca][TESTE1] 2026-11-24T09:31:21.302Z IDOR_BLOQUEADO {"usuario":"6b0559699c1f0a01f4eef682","recurso":"canal","id":"sintetico-A-xz50r6","rota":"POST /safras"}
+Encerrando...
+Deseja finalizar o arquivo em lotes (S/N)? 
+^C

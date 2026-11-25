@@ -2,25 +2,23 @@ const Leitura = require('../models/Leitura');
 
 const MS_DIA = 24 * 60 * 60 * 1000;
 
-async function listar({ inicio, fim, canalId, limite = 500 }) {
-  const filtro = { lidoEm: { $gte: inicio, $lte: fim } };
-  if (canalId) filtro.canalId = canalId;
+// `canais` = canais do usuário logado (vem de canaisPermitidos). Lista vazia = nenhuma leitura.
+async function listar({ inicio, fim, canais, limite = 500 }) {
+  const filtro = { lidoEm: { $gte: inicio, $lte: fim }, canalId: { $in: canais } };
 
   const leituras = await Leitura.find(filtro).sort({ lidoEm: -1 }).limit(limite).lean();
   return leituras.reverse(); // devolve em ordem cronológica
 }
 
-function ultima(canalId) {
-  const filtro = canalId ? { canalId } : {};
-  return Leitura.findOne(filtro).sort({ lidoEm: -1 }).lean();
+function ultima(canais) {
+  return Leitura.findOne({ canalId: { $in: canais } }).sort({ lidoEm: -1 }).lean();
 }
 
-async function resumo(periodo, canalId) {
+async function resumo(periodo, canais) {
   const dias = periodo === 'semana' ? 7 : 1;
   const inicio = new Date(Date.now() - dias * MS_DIA);
 
-  const filtro = { lidoEm: { $gte: inicio } };
-  if (canalId) filtro.canalId = canalId;
+  const filtro = { lidoEm: { $gte: inicio }, canalId: { $in: canais } };
 
   const [r] = await Leitura.aggregate([
     { $match: filtro },

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const safraSchema = new mongoose.Schema({
+  donoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true, index: true },
   nome: { type: String, required: true, trim: true },
   variedade: { type: String, required: true, trim: true },
   // Graus-dia (°C-dia) da poda até a colheita para esta variedade.

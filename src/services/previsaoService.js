@@ -1,6 +1,7 @@
 const Safra = require('../models/Safra');
 const Leitura = require('../models/Leitura');
 const Previsao = require('../models/Previsao');
+const Dispositivo = require('../models/Dispositivo');
 const P = require('../config/parametrosVideira');
 
 const MS_DIA = 24 * 60 * 60 * 1000;
@@ -20,9 +21,8 @@ function scoreFaixa(valor, { min, max, tolerancia }) {
 }
 
 // Agrega as leituras por dia (fuso de Recife)
-function agregarPorDia(inicio, fim, canalId) {
-  const filtro = { lidoEm: { $gte: inicio, $lte: fim } };
-  if (canalId) filtro.canalId = canalId;
+function agregarPorDia(inicio, fim, canais) {
+  const filtro = { lidoEm: { $gte: inicio, $lte: fim }, canalId: { $in: canais } };
 
   return Leitura.aggregate([
     { $match: filtro },
@@ -61,8 +61,9 @@ function grausDiaDoDia(dia) {
 
 const media = (lista) => (lista.length ? lista.reduce((a, b) => a + b, 0) / lista.length : 0);
 
-async function calcularPrevisao(safraId, { persistir = false } = {}) {
-  const safra = await Safra.findById(safraId);
+// donoId é obrigatório: a safra só é lida se pertencer ao usuário (defesa também na camada de serviço)
+async function calcularPrevisao(safraId, donoId, { persistir = false } = {}) {
+  const safra = await Safra.findOne({ _id: safraId, donoId });
   if (!safra) throw erro(404, 'Safra não encontrada');
 
   if (safra.status === 'encerrada') {
@@ -70,7 +71,11 @@ async function calcularPrevisao(safraId, { persistir = false } = {}) {
   }
 
   const agora = new Date();
-  const dias = await agregarPorDia(safra.dataPoda, agora, safra.canalId);
+  // Safra sem canal usa só os canais do próprio dono (nunca leituras de outros usuários)
+  const canais = safra.canalId
+    ? [safra.canalId]
+    : (await Dispositivo.find({ donoId }).select('canalId').lean()).map((d) => d.canalId);
+  const dias = await agregarPorDia(safra.dataPoda, agora, canais);
   if (!dias.length) throw erro(422, 'Ainda não há leituras no período desta safra');
 
   const diasDecorridos = Math.max(1, Math.ceil((agora - safra.dataPoda) / MS_DIA));
@@ -128,10 +133,10 @@ async function calcularPrevisao(safraId, { persistir = false } = {}) {
 }
 
 // Soma dos kg previstos das safras ativas cuja colheita cai no período
-async function previsaoPorPeriodo(inicio, fim) {
-  const safras = await Safra.find({ status: 'ativa' });
+async function previsaoPorPeriodo(inicio, fim, donoId) {
+  const safras = await Safra.find({ status: 'ativa', donoId });
   const resultados = await Promise.all(
-    safras.map((s) => calcularPrevisao(s._id).catch(() => null)) // ignora safras sem leitura
+    safras.map((s) => calcularPrevisao(s._id, donoId).catch(() => null)) // ignora safras sem leitura
   );
 
   const noPeriodo = resultados.filter(

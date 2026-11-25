@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('./config/env');
 const mqttClient = require('./mqtt/client');
 const { naoEncontrado, tratarErros } = require('./middlewares/erros');
+const { autenticar } = require('./middlewares/autenticar');
 
 const app = express();
 
@@ -18,8 +19,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/leituras', require('./routes/leituraRoutes'));
-app.use('/safras', require('./routes/safraRoutes'));
+app.use('/auth', require('./routes/authRoutes'));
+
+// Daqui para baixo, só com login completo (senha + OTP)
+app.use('/leituras', autenticar, require('./routes/leituraRoutes'));
+app.use('/safras', autenticar, require('./routes/safraRoutes'));
+app.use('/dispositivos', autenticar, require('./routes/dispositivoRoutes'));
 
 app.use(naoEncontrado);
 app.use(tratarErros);

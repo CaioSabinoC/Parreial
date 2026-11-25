@@ -179,3 +179,18 @@ As principais configurações estão documentadas em `.env.example`.
 | `FIELD_UMIDADE_SOLO` | Campo da umidade do solo |
 | `SOLO_RAW_SECO` | Referência de calibração do solo seco |
 | `SOLO_RAW_MOL
+| `CODIGO_MISSAO` | Código de 6 caracteres enviado pelo professor (obrigatório) |
+| `JWT_SECRET` | Texto aleatório com 32 ou mais caracteres, usado para assinar os tokens (obrigatório) |
+| `OTP_CHAVE` | 64 caracteres hexadecimais, usados para cifrar os segredos do OTP (obrigatório) |
+
+## Segurança (OTP + IDOR)
+
+A API agora exige login em 2 etapas (senha + código de app autenticador) e cada usuário só acessa os próprios dados. Detalhes, testes e limitações em [`seguranca/README.md`](seguranca/README.md). Rotas novas: `/auth/*` e `/dispositivos`.
+
+Variáveis de ambiente obrigatórias (sem elas a API não sobe):
+
+| Variável | Finalidade |
+|---|---|
+| `CODIGO_MISSAO` | Código de 6 caracteres enviado pelo professor |
+| `JWT_SECRET` | Texto aleatório com 32 ou mais caracteres, usado para assinar os tokens |
+| `OTP_CHAVE` | 64 caracteres hexadecimais, usados para cifrar os segredos do OTP |
